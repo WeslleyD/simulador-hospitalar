@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor Hospitalar Cloud-Ready</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Gestor de Censo e Projeção</h1>
+        <p>Acesse e edite seu planejamento em qualquer dispositivo</p>
+    </header>
+
+    <div class="input-panel">
+        <h3>Registrar Internação</h3>
+        <div class="form-grid">
+            <div class="field">
+                <label>Mês / Semana</label>
+                <select id="select-semana">
+                    <option value="0">Mês Atual - S1</option>
+                    <option value="1">Mês Atual - S2</option>
+                    <option value="2">Mês Atual - S3</option>
+                    <option value="3">Mês Atual - S4</option>
+                    <option value="4">Mês Seg. - S1</option>
+                    <option value="5">Mês Seg. - S2</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Dia</label>
+                <select id="select-dia">
+                    <option value="0">Segunda</option>
+                    <option value="1">Terça</option>
+                    <option value="2">Quarta</option>
+                    <option value="3">Quinta</option>
+                    <option value="4">Sexta</option>
+                    <option value="5">Sábado</option>
+                    <option value="6">Domingo</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Classe</label>
+                <select id="select-classe">
+                    <option value="Convencional">Convencional</option>
+                    <option value="MR">MR</option>
+                    <option value="Parkinson">Parkinson</option>
+                    <option value="Ataxias">Ataxias</option>
+                    <option value="HD">HD</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Qtd</label>
+                <input type="number" id="input-qtd" value="1" min="1">
+            </div>
+            <div class="field">
+                <label>Duração</label>
+                <select id="select-duracao">
+                    <option value="7">1 Semana</option>
+                    <option value="14">2 Semanas</option>
+                </select>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn-add" onclick="adicionarEntrada()">Adicionar ao Fluxo</button>
+            <button class="btn-clear" onclick="limparTudo()">Limpar Banco de Dados</button>
+        </div>
+    </div>
+
+    <div class="historico-panel">
+        <h4>Registros Inseridos (Exclusão Individual)</h4>
+        <div id="lista-registros" class="lista-items"></div>
+    </div>
+
+    <div class="dashboard">
+        <div class="card blue">
+            <h3>Média de Ocupação</h3>
+            <span id="media-geral">0.0</span>
+        </div>
+        <div id="card-status" class="card status-neutral">
+            <h3>Status da Meta</h3>
+            <span id="status-meta">SEM DADOS</span>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="mudarSemana(0)">S1</button>
+        <button class="tab-btn" onclick="mudarSemana(1)">S2</button>
+        <button class="tab-btn" onclick="mudarSemana(2)">S3</button>
+        <button class="tab-btn" onclick="mudarSemana(3)">S4</button>
+        <button class="tab-btn next-month" onclick="mudarSemana(4)">MS1</button>
+        <button class="tab-btn next-month" onclick="mudarSemana(5)">MS2</button>
+    </div>
+
+    <div class="table-container">
+        <h3 id="titulo-semana">Mês Atual - Semana 1</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Dia</th>
+                    <th>Entradas</th>
+                    <th>Altas</th>
+                    <th>Censo</th>
+                    <th>Distribuição</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
