@@ -2,8 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor Hospitalar Cloud-Ready</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulador de Censo - Regra de Alta Sexta</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,14 +11,14 @@
 <div class="container">
     <header>
         <h1>Gestor de Censo e Projeção</h1>
-        <p>Acesse e edite seu planejamento em qualquer dispositivo</p>
+        <p>Planejamento Mensal com Regras de Alta Estratégica</p>
     </header>
 
     <div class="input-panel">
         <h3>Registrar Internação</h3>
         <div class="form-grid">
             <div class="field">
-                <label>Mês / Semana</label>
+                <label>Semana</label>
                 <select id="select-semana">
                     <option value="0">Mês Atual - S1</option>
                     <option value="1">Mês Atual - S2</option>
@@ -64,12 +64,12 @@
         </div>
         <div class="actions">
             <button class="btn-add" onclick="adicionarEntrada()">Adicionar ao Fluxo</button>
-            <button class="btn-clear" onclick="limparTudo()">Limpar Banco de Dados</button>
+            <button class="btn-clear" onclick="limparTudo()">Resetar Tudo</button>
         </div>
     </div>
 
     <div class="historico-panel">
-        <h4>Registros Inseridos (Exclusão Individual)</h4>
+        <h4>Registros Ativos (Clique no X para remover)</h4>
         <div id="lista-registros" class="lista-items"></div>
     </div>
 
@@ -102,7 +102,7 @@
                     <th>Entradas</th>
                     <th>Altas</th>
                     <th>Censo</th>
-                    <th>Distribuição</th>
+                    <th>Composição</th>
                 </tr>
             </thead>
             <tbody id="table-body"></tbody>
