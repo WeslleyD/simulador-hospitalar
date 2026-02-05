@@ -1,9 +1,9 @@
-// Carrega dados salvos ou inicia vazio
-let baseDeDados = JSON.parse(localStorage.getItem('hospitalData')) || [];
+let baseDeDados = JSON.parse(localStorage.getItem('censoDataV2')) || [];
 let semanaAtualView = 0;
 
-function salvarLocal() {
-    localStorage.setItem('hospitalData', JSON.stringify(baseDeDados));
+function salvarEAtualizar() {
+    localStorage.setItem('censoDataV2', JSON.stringify(baseDeDados));
+    calcularSimulacao();
 }
 
 function adicionarEntrada() {
@@ -15,24 +15,38 @@ function adicionarEntrada() {
 
     if (!qtd || qtd <= 0) return;
 
-    let diaEntradaAbsoluto = (semana * 7) + dia;
-    let diaAltaAbsoluto = (dia === 0 && duracao === 7) ? (semana * 7) + 4 : diaEntradaAbsoluto + duracao;
+    let diaEntradaAbs = (semana * 7) + dia;
+    let diaAltaAbs;
+
+    // REGRA DE ALTA ESTRATÉGICA
+    if (dia === 0) { // Entrada na Segunda
+        if (duracao === 7) {
+            // Regra 1: Internou Segunda (1 sem) -> Alta na Sexta da mesma semana
+            diaAltaAbs = (semana * 7) + 4; 
+        } else if (duracao === 14) {
+            // Regra 2: Internou Segunda (2 sem) -> Alta na Sexta da semana seguinte
+            diaAltaAbs = (semana * 7) + 11; 
+        } else {
+            diaAltaAbs = diaEntradaAbs + duracao;
+        }
+    } else {
+        // Regra Padrão para outros dias
+        diaAltaAbs = diaEntradaAbs + duracao;
+    }
 
     baseDeDados.push({
         id: Date.now(),
-        inicio: diaEntradaAbsoluto,
-        fim: diaAltaAbsoluto,
-        classe, qtd, semana, diaOriginal: dia
+        inicio: diaEntradaAbs,
+        fim: diaAltaAbs,
+        classe, qtd, semana, diaOriginal: dia, duracaoOriginal: duracao
     });
 
-    salvarLocal();
-    calcularSimulacao();
+    salvarEAtualizar();
 }
 
 function excluirRegistro(id) {
-    baseDeDados = baseDeDados.filter(item => item.id !== id);
-    salvarLocal();
-    calcularSimulacao();
+    baseDeDados = baseDeDados.filter(i => i.id !== id);
+    salvarEAtualizar();
 }
 
 function mudarSemana(s) {
@@ -44,26 +58,26 @@ function mudarSemana(s) {
 }
 
 function limparTudo() {
-    if(confirm("Apagar todos os dados permanentemente?")) {
+    if(confirm("Deseja apagar todos os dados permanentemente?")) {
         baseDeDados = [];
-        localStorage.removeItem('hospitalData');
+        localStorage.removeItem('censoDataV2');
         calcularSimulacao();
     }
 }
 
 function calcularSimulacao() {
     const nomesDias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
-    const nomesSemanas = ["S1", "S2", "S3", "S4", "MS1", "MS2"];
+    const nomesSem = ["S1", "S2", "S3", "S4", "MS1", "MS2"];
     const tbody = document.getElementById('table-body');
-    const listaHtml = document.getElementById('lista-registros');
+    const listaReg = document.getElementById('lista-registros');
     
     tbody.innerHTML = "";
-    listaHtml.innerHTML = "";
+    listaReg.innerHTML = "";
 
     baseDeDados.forEach(reg => {
-        listaHtml.innerHTML += `
+        listaReg.innerHTML += `
             <div class="item-reg">
-                ${nomesSemanas[reg.semana]}: ${reg.classe} (${reg.qtd}) 
+                ${nomesSem[reg.semana]}: ${reg.classe} (${reg.qtd}) 
                 <button class="btn-del" onclick="excluirRegistro(${reg.id})">✕</button>
             </div>`;
     });
@@ -74,6 +88,8 @@ function calcularSimulacao() {
     baseDeDados.forEach(reg => {
         if (reg.inicio < 42) detalheTotal[reg.inicio].entradas += reg.qtd;
         if (reg.fim < 42) detalheTotal[reg.fim].altas += reg.qtd;
+        
+        // Censo conta do dia de entrada até o dia anterior à alta
         for (let i = reg.inicio; i < reg.fim && i < 42; i++) {
             censoTotal[i] += reg.qtd;
             detalheTotal[i].classes[reg.classe] = (detalheTotal[i].classes[reg.classe] || 0) + reg.qtd;
@@ -85,7 +101,7 @@ function calcularSimulacao() {
         let diaRel = d % 7;
         let censo = censoTotal[d];
         let info = detalheTotal[d];
-        const isMeta = censo >= 34 && censo <= 40;
+        const meta = censo >= 34 && censo <= 40;
         let tags = Object.entries(info.classes).map(([n, q]) => `<span class="tag">${n}:${q}</span>`).join("");
 
         tbody.innerHTML += `
@@ -93,21 +109,20 @@ function calcularSimulacao() {
                 <td><strong>${nomesDias[diaRel]}</strong></td>
                 <td>${info.entradas}</td>
                 <td>${info.altas}</td>
-                <td style="font-weight:bold; color:${isMeta ? '#16a34a' : '#dc2626'}">${censo}</td>
+                <td style="font-weight:800; color:${meta ? '#16a34a' : '#dc2626'}">${censo}</td>
                 <td>${tags || "---"}</td>
             </tr>`;
     }
 
-    let diasComDados = censoTotal.filter(v => v > 0).length || 1;
-    let media = (censoTotal.reduce((a, b) => a + b, 0) / diasComDados).toFixed(1);
+    let ocupMes = censoTotal.slice(0, 28);
+    let media = (ocupMes.reduce((a, b) => a + b, 0) / 28).toFixed(1);
     document.getElementById('media-geral').innerText = media;
 
     const card = document.getElementById('card-status');
     const status = document.getElementById('status-meta');
     if (media >= 34 && media <= 40) { card.className = "card status-ok"; status.innerText = "META OK"; }
     else if (media > 0) { card.className = "card status-alert"; status.innerText = "FORA DA META"; }
-    else { card.className = "card status-neutral"; status.innerText = "VAZIO"; }
+    else { card.className = "card status-neutral"; status.innerText = "SEM DADOS"; }
 }
 
-// Inicia o cálculo ao abrir a página
 calcularSimulacao();
